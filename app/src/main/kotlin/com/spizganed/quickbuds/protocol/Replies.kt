@@ -20,6 +20,22 @@ object Replies {
     fun knownGroup(cmd: Int): Boolean = (cmd shr 8) in KNOWN_GROUPS
 
     /**
+     * True when [replyCmd]/[replySeq] matches [reqCmd]/[reqSeq].
+     * On realme Buds T01 (`064412`), buds use their own sequence counter and do not echo [reqSeq],
+     * so replies match on `replyCmd == (reqCmd or 0x8000)` alone. `[CAPTURE]`
+     */
+    fun matchesReply(
+        reqCmd: Int,
+        reqSeq: Int,
+        replyCmd: Int,
+        replySeq: Int,
+        productId: String? = null
+    ): Boolean {
+        if (replyCmd != (reqCmd or 0x8000)) return false
+        return if (RowRules.isT01(productId)) true else replySeq == reqSeq
+    }
+
+    /**
      * The answer to a frame the buds send on their own, as a whole packet, or null when no answer is due.
      * [cmd], [seq] and [payload] are the incoming frame's. [unixSeconds] is the phone's clock. `[VENDOR]`
      */

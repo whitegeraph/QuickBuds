@@ -4,7 +4,7 @@ package com.spizganed.quickbuds.protocol
  * The sync engine for one setting write. No clock, no threads: the caller passes `now` (ms).
  * One operation is active. The others wait in a queue, in tap order.
  */
-class FeatureSync {
+class FeatureSync @JvmOverloads constructor(var matchSeq: Boolean = true) {
     enum class Confirm { READ, PUSH, ACK }
     enum class ToastKind { REFUSED_MISSING, REFUSED_NOW, NOT_CHANGED, NO_ANSWER }
 
@@ -55,7 +55,7 @@ class FeatureSync {
 
     fun ack(seq: Int, status: Int, now: Long): List<Out> {
         val a = active ?: return emptyList()
-        if (a.phase != Phase.ACK || seq != a.seq) return emptyList()
+        if (a.phase != Phase.ACK || (matchSeq && seq != a.seq)) return emptyList()
         val out = mutableListOf<Out>()
 
         if (status != 0) {
@@ -119,7 +119,7 @@ class FeatureSync {
 
         val a = active ?: return out
         val confirms = when (a.phase) {
-            Phase.REPLY -> seq != null && seq == a.readSeq
+            Phase.REPLY -> if (matchSeq) seq != null && seq == a.readSeq else !push && a.op.key in values
             Phase.PUSH -> push && a.op.key in values
             Phase.RESTART -> a.reconnected
             Phase.ACK -> false

@@ -54,7 +54,20 @@ object OpoProtocol {
     const val CMD_QUERY_EQ_ALL = 0x0122
     const val CMD_QUERY_BASSWAVE_LEVEL = 0x0124
     const val CMD_SET_EQ = 0x0406
+    /** Volume enhancer on realme Buds T01 (`064412`): `0x0407 <01|00>` -> `0x8407 00`. `[CAPTURE]` */
+    const val CMD_SET_VOLUME_ENHANCER = 0x0407
     const val CMD_SAVE_CUSTOM_EQ = 0x0418
+
+    /** Sound effect presets on realme Buds T01 (`064412`), written with [CMD_SET_EQ] and read with [CMD_QUERY_EQ]. `[CAPTURE]` */
+    enum class SoundEffect(val id: Int) {
+        BASS_BOOST_PLUS(0x00),
+        BALANCED(0x01),
+        BRIGHT(0x02);
+
+        companion object {
+            fun fromId(id: Int): SoundEffect? = values().firstOrNull { it.id == id }
+        }
+    }
     const val CMD_SET_BASSWAVE_LEVEL = 0x041B
     const val CMD_EQ_CHANGED = 0x0504     // push: `<id>` after any EQ change
     /** Feature changed, push `<count> <id> <value>...` after a [CMD_SET_FEATURE] write or a buds gesture. */

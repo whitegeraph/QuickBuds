@@ -826,7 +826,7 @@ push 0x0504 <id>                              the EQ changed
 - Ids are renumbered after create and delete. Read `0x0122` again each time `[CAPTURE]`.
 - Built-in presets differ per model `[VENDOR]`: `eqPresets` lists `{mode, slot}`; `slot` is the `0x0406` id. Buds 4: 0 Balanced, 1 Clear Vocals, 2 Bass. Nord Buds 2r: 0, 1 Bold, 2. Types 1-4 are named differently where `eqKind` is `2` (or Enco R / Air2). 41 of 143 models have none.
 - Firmware-gated lists drop entries whose `minFirmware` is above the buds' firmware `[VENDOR]` (the lower non-zero of left and right, `138` on Buds 4, unreadable = 0). Use `eqPresetsCompat`, else `eqPresetsByFirmware`, else `eqPresets`. Stable sort by `order` (0 if absent).
-- realme models `[VENDOR]`: four built-ins. `0x0406` ids: 0 Pure Raw, 1 Deep Bass, 2 Pure Voice, 3 Pure Bass. 28 realme models have them, not in HeyMelody's list. `models.json` gives them our own types 101-104, `eqKind` 1. T110 and T01 have three other presets with unknown ids: no EQ until a capture.
+- realme models `[VENDOR]`: four built-ins. `0x0406` ids: 0 Pure Raw, 1 Deep Bass, 2 Pure Voice, 3 Pure Bass. 28 realme models have them, not in HeyMelody's list. `models.json` gives them our own types 101-104, `eqKind` 1. T01 (`064412`) `[CAPTURE]`: `0x0406` sets 0 Bass Boost+, 1 Balanced, 2 Bright (`0x010F` reads `00 <v>`); `0x0407` sets volume enhancer `01` on / `00` off; `0x010D` queries `01 06`; replies carry `04 00` header and the buds' own `Seq` (matched on `Cmd | 0x8000`). T110 still needs a capture.
 - A model shows custom presets with `customEq` and `0x0418` in the bitmap `[VENDOR]`, and BassWave with `bassEngine` and `0x041B`. An EQ row shows where `eqKind` is 1-4 or custom presets exist. New presets use the model's `customEqBands` (10 bands `31 62 125 250 500 1k 2k 4k 8k 16k` on 10 models), else 6 bands `62 250 1k 4k 8k 16k`. `customEqLimit` caps presets (default 3). Reads go out only where the bitmap lists them.
 
 Per-model preset lists are in section 21.6.
@@ -1046,7 +1046,7 @@ Every rule in this section names the model id, the byte and the value. A topic s
 - Types 1-4 are named differently where `eqKind` is `2` (or Enco R `063010` / Air2 `063410`) `[VENDOR]`.
 - 41 of 143 models have no built-in presets `[VENDOR]`.
 - realme: 28 models have four built-ins, not in HeyMelody's list. `0x0406` ids: 0 Pure Raw, 1 Deep Bass, 2 Pure Voice, 3 Pure Bass. `models.json` uses types 101-104, `eqKind` 1 `[VENDOR]`.
-- realme T110 `062812` and T01 `064412`: three other presets with unknown ids. No EQ until a capture `[VENDOR]`.
+- realme T01 `064412` `[CAPTURE]`: `0x0406` / `0x010F` ids 0 Bass Boost+, 1 Balanced, 2 Bright; `0x0407` volume enhancer (`01` on, `00` off). T110 `062812`: three presets with unknown ids, no EQ until a capture `[VENDOR]`.
 - Firmware gate: drop an entry whose `minFirmware` is above the buds' firmware (the lower non-zero of left and right; `138` on Buds 4; unreadable = 0). Use `eqPresetsCompat`, else `eqPresetsByFirmware`, else `eqPresets`. Stable sort by `order` (0 if absent) `[VENDOR]`.
 - 10 models use the 10-band custom EQ `[VENDOR]` `31 62 125 250 500 1k 2k 4k 8k 16k`. The others use 6 bands `62 250 1k 4k 8k 16k`. `customEqLimit` defaults to 3 `[VENDOR]`.
 

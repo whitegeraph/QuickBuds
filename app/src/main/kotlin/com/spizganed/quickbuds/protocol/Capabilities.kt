@@ -98,6 +98,19 @@ object Capabilities {
     /** The game mode switch: `0x28` on buds with game sound types, else `0x06`. */
     fun gameModeId(context: Context) = RowRules.gameModeId(commands(context))
 
+    /** True when the active model is realme Buds T01 (`064412`). */
+    fun isT01(context: Context): Boolean =
+        RowRules.isT01(ModelCatalog.current(context)?.id) ||
+            RowRules.isT01(prefs(context).getString(KEY_PRODUCT_ID, null))
+
+    /** True when T01 sound effects (`0x0406` / `0x010F`) are supported. */
+    fun hasSoundEffects(context: Context): Boolean =
+        isT01(context) && supports(context, OpoProtocol.CMD_SET_EQ)
+
+    /** True when T01 volume enhancer (`0x0407`) is supported. */
+    fun hasVolumeEnhancer(context: Context): Boolean =
+        isT01(context) && supports(context, OpoProtocol.CMD_SET_VOLUME_ENHANCER)
+
     /** The buds listed [id] in their last `0x810D` reply. Nothing read yet means no. */
     fun hasFeature(context: Context, id: Int): Boolean = reply(context)?.containsKey(id) == true
 

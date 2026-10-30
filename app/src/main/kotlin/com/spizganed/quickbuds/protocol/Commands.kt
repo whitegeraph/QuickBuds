@@ -280,11 +280,28 @@ internal object Commands {
     /** Current EQ -> `0x810F` `00 <id>` (00-02 built-in, 04+ custom). */
     fun queryEq(): ByteArray = OpoProtocol.buildPacket(OpoProtocol.CMD_QUERY_EQ)
 
+    /** Read T01 sound effect (`0x010F`) -> `0x810F` `00 <v>`. `[CAPTURE]` */
+    fun querySoundEffect(seq: Int? = null): ByteArray =
+        OpoProtocol.buildPacket(OpoProtocol.CMD_QUERY_EQ, seq = seq)
+
     /** Custom preset list -> `0x8122`, see [EqCodec.parseList]. Empty payload, as HeyMelody sends it. */
     fun queryEqAll(): ByteArray = OpoProtocol.buildPacket(OpoProtocol.CMD_QUERY_EQ_ALL)
 
     fun setBuiltInEq(id: Int): ByteArray =
         OpoProtocol.buildPacket(OpoProtocol.CMD_SET_EQ, payload = builtInEqPayload(id))
+
+    /** Set T01 sound effect (`0x0406 <v>`) -> `0x8406 00`. `[CAPTURE]` */
+    fun setSoundEffect(id: Int, seq: Int? = null): ByteArray =
+        OpoProtocol.buildPacket(OpoProtocol.CMD_SET_EQ, seq = seq, payload = builtInEqPayload(id))
+
+    fun setSoundEffect(effect: OpoProtocol.SoundEffect, seq: Int? = null): ByteArray =
+        setSoundEffect(effect.id, seq = seq)
+
+    /** Set T01 volume enhancer (`0x0407 <01|00>`) -> `0x8407 00`. `[CAPTURE]` */
+    fun volumeEnhancer(on: Boolean, seq: Int? = null): ByteArray =
+        OpoProtocol.buildPacket(OpoProtocol.CMD_SET_VOLUME_ENHANCER, seq = seq, payload = volumeEnhancerPayload(on))
+
+    internal fun volumeEnhancerPayload(on: Boolean): ByteArray = byteArrayOf(if (on) 0x01 else 0x00)
 
     internal fun builtInEqPayload(id: Int): ByteArray = byteArrayOf(id.toByte())
 

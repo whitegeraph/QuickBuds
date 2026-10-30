@@ -57,12 +57,27 @@ object RowRules {
     const val EQ_CUSTOM = "eqCustom"
     const val BASS_WAVE = "bassWave"
 
+    // realme Buds T01 (064412) capabilities.
+    const val ID_T01 = "064412"
+    const val SOUND_EFFECTS = "soundEffects"
+    const val VOLUME_ENHANCER = "volumeEnhancer"
+
     // Dual connection screen parts.
     const val DUAL_PRIORITY = "dualPriority"
     const val DUAL_DEVICES = "dualDevices"
 
     /** The two game-mode ids: the buds use one of them as their switch. Both are asked. */
     private val GAME_IDS = intArrayOf(Feature.GAME_MODE, Feature.GAME_MODE_MAIN)
+
+    fun isT01(modelId: String?): Boolean = modelId.equals(ID_T01, ignoreCase = true)
+
+    fun isT01(model: JSONObject?): Boolean = isT01(model?.optString("id"))
+
+    fun soundEffects(model: JSONObject?, bitmap: Set<Int>?): Boolean =
+        isT01(model) && (bitmap == null || OpoProtocol.CMD_SET_EQ in bitmap)
+
+    fun volumeEnhancer(model: JSONObject?, bitmap: Set<Int>?): Boolean =
+        isT01(model) && (bitmap == null || OpoProtocol.CMD_SET_VOLUME_ENHANCER in bitmap)
 
     /**
      * The rows to show.
@@ -129,6 +144,8 @@ object RowRules {
         if (eqPresets(model, bitmap)) out += EQ_PRESETS
         if (eqCustom(model, bitmap)) out += EQ_CUSTOM
         if (model?.optInt("bassEngine") == 1 && OpoProtocol.CMD_SET_BASSWAVE_LEVEL in caps) out += BASS_WAVE
+        if (soundEffects(model, bitmap)) out += SOUND_EFFECTS
+        if (volumeEnhancer(model, bitmap)) out += VOLUME_ENHANCER
         if (has(Feature.DUAL_DEVICE)) {
             out += DUAL_DEVICES
             if (dualPriority(model) && OpoProtocol.CMD_MULTI_CONNECT in caps) out += DUAL_PRIORITY
@@ -141,6 +158,7 @@ object RowRules {
      * game-mode ids. Null when the model has no list: the caller uses the default list.
      */
     fun askQuery(model: JSONObject?, bitmap: Set<Int>?): String? {
+        if (isT01(model)) return "%02X".format(Feature.GAME_MODE)
         val base = model?.optString("statusQuery")?.takeIf { it.isNotBlank() } ?: return null
         val ids = base.split(' ').mapNotNull { it.toIntOrNull(16) }.toMutableSet()
         askExtras(model).forEach { ids += it }
